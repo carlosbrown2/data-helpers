@@ -365,6 +365,27 @@ class DLearn:
         ax.grid('off')
         return ax
 
+class extendPandas:
+    '''Helper functions to extend pandas manipulations for common data wrangling tasks'''
+    def __init__(self, *args):
+        pass
+    
+    def rolling_average(self, df_roll, periods, column, id_col, date_col='date'):
+        '''Perform rolling window calculation on dataframe with non-consecutive dates in the index'''
+        df = df_roll.copy()
+        try:
+            df_pivot = df.pivot(index=id_col, columns=date_col, values=column)
+        except ValueError as e:
+            print(e)
+        df_pivot_roll = df_pivot.rolling(window=periods, axis=1).mean()
+        df_pivot_roll = df_pivot_roll.reset_index(drop=False)
+        var_name = column + '_rolling'
+        df_melt = df_pivot_roll.melt(id_vars=id_col, var_name=var_name)
+        df_melt = df_melt.reset_index(drop=False)
+
+        df = df.merge(df_melt, on=[date_col, id_col])
+
+        return df
 
 if __name__ == '__main__':
     # Example usage
